@@ -12,7 +12,7 @@ const name = "Franco";
 const role = "Full Stack Software Developer";
 const tagline = "Creator of FAHR Designs.";
 // NOTE: Replace with your actual headshot path, e.g. /images/headshot.png
-const headshot = "https://via.placeholder.com/360x420";
+const headshot = "/images/playful-headshot.webp";
 ---
 
 <!DOCTYPE html>
@@ -267,7 +267,7 @@ const headshot = "https://via.placeholder.com/360x420";
       <aside class="sidebar">
         <div class="sidebar-inner">
           <div class="avatar-ring">
-            <img src="/src/assets/playful-headshot.webp" alt="brand-logo" />
+            <img src={headshot} alt="brand-logo" />
           </div>
           <div>
             <p class="sidebar-name">{name}</p>
