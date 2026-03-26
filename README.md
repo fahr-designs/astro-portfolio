@@ -1,12 +1,9 @@
-# Astro Starter Kit: Blog
+# FAHR Designs Page
 
-```sh
-npm create astro@latest -- --template blog
-```
+This is a simple portfolio page for my brand FAHR Designs. It started with scaffolding one of the starter templates that was provided by the Astro repo.
+The command that was used is as follows:
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-Features:
+These are some of the features that are included:
 
 - ✅ Minimal styling (make it your own!)
 - ✅ 100/100 Lighthouse performance
@@ -16,8 +13,6 @@ Features:
 - ✅ Markdown & MDX support
 
 ## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
 
 ```text
 ├── public/
@@ -53,10 +48,3 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
