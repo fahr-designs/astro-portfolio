@@ -1,0 +1,452 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+---
+
+<html lang="en">
+  <head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+
+  <body>
+    <Header />
+    <!-- Subtle grid overlay matching portfolio background motif -->
+    <div class="grid-overlay" aria-hidden="true"></div>
+
+    <main>
+      <header class="page-header">
+        <span class="label">— Get in touch</span>
+        <h1>Let's talk.</h1>
+        <p class="subtext">
+          Fill out the fields below and I'll respond within a few days.
+        </p>
+      </header>
+
+      <form
+        id="contact-form"
+        method="POST"
+        action="/api/contact"
+        novalidate
+      >
+        <div class="field-group">
+          <div class="field">
+            <label for="name">
+              <span class="field-num">01</span> Full name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Your name"
+              autocomplete="name"
+              required
+            />
+            <span class="error" id="name-error"></span>
+          </div>
+
+          <div class="field">
+            <label for="email">
+              <span class="field-num">02</span> Email address
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+            <span class="error" id="email-error"></span>
+          </div>
+
+          <div class="field">
+            <label for="subject">
+              <span class="field-num">03</span> Subject
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              placeholder="What's this about?"
+              required
+            />
+            <span class="error" id="subject-error"></span>
+          </div>
+
+          <div class="field field--full">
+            <label for="message">
+              <span class="field-num">04</span> Message
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows="6"
+              placeholder="Write your message here..."
+              required
+            ></textarea>
+            <span class="error" id="message-error"></span>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <p class="privacy-note">Your information is never shared or sold.</p>
+          <button type="submit" id="submit-btn">
+            <span class="btn-text">Send message</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+        <div id="form-status" role="alert" aria-live="polite"></div>
+      </form>
+    </main>
+
+    <script>
+      const form = document.getElementById("contact-form") as HTMLFormElement;
+      const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+      const statusEl = document.getElementById("form-status") as HTMLElement;
+
+      const fields = [
+        { id: "name", errorId: "name-error", message: "Name is required." },
+        { id: "email", errorId: "email-error", message: "A valid email is required." },
+        { id: "subject", errorId: "subject-error", message: "Subject is required." },
+        { id: "message", errorId: "message-error", message: "Message is required." },
+      ];
+
+      function clearErrors() {
+        fields.forEach(({ errorId }) => {
+          const el = document.getElementById(errorId);
+          if (el) el.textContent = "";
+        });
+        statusEl.textContent = "";
+        statusEl.className = "";
+      }
+
+      function validate(): boolean {
+        let valid = true;
+        fields.forEach(({ id, errorId, message }) => {
+          const input = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement;
+          const error = document.getElementById(errorId);
+          if (!input || !error) return;
+          const value = input.value.trim();
+          if (!value) {
+            error.textContent = message;
+            input.classList.add("invalid");
+            valid = false;
+          } else if (id === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            error.textContent = message;
+            input.classList.add("invalid");
+            valid = false;
+          } else {
+            input.classList.remove("invalid");
+          }
+        });
+        return valid;
+      }
+
+      fields.forEach(({ id, errorId }) => {
+        const input = document.getElementById(id);
+        const error = document.getElementById(errorId);
+        input?.addEventListener("input", () => {
+          if (error) error.textContent = "";
+          input.classList.remove("invalid");
+        });
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+        if (!validate()) return;
+
+        submitBtn.disabled = true;
+        submitBtn.querySelector(".btn-text")!.textContent = "Sending...";
+
+        try {
+          // Replace with your actual submission logic:
+          //   SSR:       fetch(form.action, { method: "POST", body: new FormData(form) })
+          //   Formspree: change form action to your Formspree URL
+          //   Netlify:   add data-netlify="true" to <form>, remove this handler
+          await new Promise((r) => setTimeout(r, 1200)); // simulated delay
+
+          form.reset();
+          statusEl.textContent = "Message sent. I'll be in touch soon.";
+          statusEl.className = "status--success";
+        } catch {
+          statusEl.textContent = "Something went wrong. Please try again.";
+          statusEl.className = "status--error";
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.querySelector(".btn-text")!.textContent = "Send message";
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  /* ─── Design Tokens (matches portfolio) ─── */
+  :root {
+    --ink:        #0e0d0b;
+    --paper:      #f2ede6;
+    --rust:       #c85b2a;
+    --rust-dim:   #8f3d19;
+    --mist:       #2a2825;
+    --muted:      #7a7570;
+    --border:     rgba(242, 237, 230, 0.15);
+    --field-bg:   #1a1916;
+    --grid-line:  rgba(242, 237, 230, 0.05);
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-mono:  'IBM Plex Mono', 'Courier New', monospace;
+    --max-w:      720px;
+  }
+
+  /* *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  } */
+
+  html, body {
+    background-color: var(--ink);
+    color: var(--paper);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Grid overlay (matches portfolio background motif) ─── */
+  .grid-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ─── Layout ─── */
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: var(--max-w);
+    margin: 0 auto;
+    padding: 5rem 2rem 6rem;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    margin-bottom: 3.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: var(--rust);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 7vw, 4.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+    color: var(--paper);
+  }
+
+  .subtext {
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 42ch;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Fields ─── */
+  .field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 2.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .field--full {
+    grid-column: 1 / -1;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+
+  .field-num {
+    color: var(--rust);
+    font-size: 0.65rem;
+  }
+
+  input,
+  textarea {
+    background: var(--field-bg);
+    border: 1px solid var(--border);
+    color: var(--paper);
+    font-size: 0.88rem;
+    font-weight: 300;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+    width: 100%;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #3d3b37;
+  }
+
+  input:focus,
+  textarea:focus {
+    border-color: var(--rust);
+    box-shadow: 0 0 0 2px rgba(200, 91, 42, 0.12);
+  }
+
+  input.invalid,
+  textarea.invalid {
+    border-color: var(--rust);
+    background: rgba(200, 91, 42, 0.05);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  /* Autofill override */
+  input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px var(--field-bg) inset;
+    -webkit-text-fill-color: var(--paper);
+  }
+
+  .error {
+    font-size: 0.68rem;
+    color: var(--rust);
+    min-height: 1em;
+    letter-spacing: 0.03em;
+  }
+
+  /* ─── Footer / Submit ─── */
+  .form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.75rem;
+  }
+
+  .privacy-note {
+    font-size: 0.68rem;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  button[type="submit"] {
+    background: transparent;
+    border: 1px solid var(--rust);
+    color: var(--rust);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 0.8rem 1.75rem;
+    text-transform: uppercase;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  button[type="submit"]:hover:not(:disabled) {
+    background: var(--rust);
+    color: var(--paper);
+  }
+
+  button[type="submit"]:active:not(:disabled) {
+    background: var(--rust-dim);
+    border-color: var(--rust-dim);
+  }
+
+  button[type="submit"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-arrow {
+    font-size: 1rem;
+    transition: transform 0.15s ease;
+  }
+
+  button[type="submit"]:hover:not(:disabled) .btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* ─── Status ─── */
+  #form-status {
+    margin-top: 1.25rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    min-height: 1.2em;
+  }
+
+  .status--success { color: #6abf8a; }
+  .status--error   { color: var(--rust); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 560px) {
+    main {
+      padding: 3rem 1.25rem 4rem;
+    }
+
+    .field-group {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .field--full {
+      grid-column: 1;
+    }
+
+    .form-footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
