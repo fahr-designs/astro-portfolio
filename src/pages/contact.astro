@@ -1,106 +1,472 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+// src/pages/contact.astro
+// To wire up form submission:
+//   - SSR mode: create src/pages/api/contact.ts and POST here
+//   - Static export: use Formspree (change form action to https://formspree.io/f/YOUR_ID)
+//   - Netlify: add data-netlify="true" to <form> and remove the JS handler
+const pageTitle = "Contact — Franco";
+const email = "franco@fahrdesigns.com";     // NOTE: replace with your actual email
+const location = "Kansas City, KS";
+const availability = "Open to opportunities";
 ---
 
+<!DOCTYPE html>
 <html lang="en">
   <head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts — same as index -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ─── Design tokens — identical to index.astro ─── */
+      :root {
+        --light-bg:    #f0efec;
+        --dark-text:   #1c2b25;
+        --green:       #3a7a5a;
+        --green-hover: #2e6148;
+        --green-faint: rgba(58, 122, 90, 0.08);
+        --mauve:       #8b3558;
+        --mauve-dark:  #6e2944;
+        --mauve-text:  #ffffff;
+        --muted:       #6b7b72;
+        --border:      #d4d2ce;
+        --field-bg:    #ffffff;
+        --font:        'Nunito', sans-serif;
+      }
+
+      html, body {
+        height: 100%;
+        font-family: var(--font);
+        overflow: hidden;
+      }
+
+      /* ─── Split layout — mirrors index.astro ─── */
+      .split {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .panel {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 4rem;
+      }
+
+      /* ─── Left: form ─── */
+      .panel--left {
+        background-color: var(--light-bg);
+        color: var(--dark-text);
+        overflow-y: auto;
+      }
+
+      .form-wrap {
+        width: 100%;
+        max-width: 440px;
+      }
+
+      .page-label {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--green);
+        margin-bottom: 0.5rem;
+      }
+
+      h1 {
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+        font-weight: 900;
+        color: var(--dark-text);
+        line-height: 1.1;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtext {
+        font-size: 0.88rem;
+        font-weight: 400;
+        color: var(--muted);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+      }
+
+      /* ─── Fields ─── */
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .field--full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      input,
+      textarea {
+        background: var(--field-bg);
+        border: 1.5px solid var(--border);
+        border-radius: 6px;
+        color: var(--dark-text);
+        font-family: var(--font);
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.6rem 0.875rem;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        -webkit-appearance: none;
+      }
+
+      input::placeholder,
+      textarea::placeholder {
+        color: #b5b3ae;
+        font-weight: 400;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px var(--green-faint);
+      }
+
+      input.invalid,
+      textarea.invalid {
+        border-color: var(--mauve);
+        box-shadow: 0 0 0 3px rgba(139, 53, 88, 0.08);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 120px;
+      }
+
+      .error {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--mauve);
+        min-height: 1em;
+        letter-spacing: 0.02em;
+      }
+
+      /* ─── Form footer ─── */
+      .form-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1.5px solid var(--border);
+      }
+
+      .privacy-note {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .btn-submit {
+        background-color: var(--green);
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-family: var(--font);
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        padding: 0.65rem 1.5rem;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+        white-space: nowrap;
+      }
+
+      .btn-submit:hover:not(:disabled) {
+        background-color: var(--green-hover);
+      }
+
+      .btn-submit:active:not(:disabled) {
+        transform: translateY(1px);
+      }
+
+      .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-arrow {
+        font-size: 1rem;
+        transition: transform 0.15s ease;
+      }
+
+      .btn-submit:hover:not(:disabled) .btn-arrow {
+        transform: translateX(3px);
+      }
+
+      #form-status {
+        margin-top: 1rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-height: 1.2em;
+      }
+
+      .status--success { color: var(--green); }
+      .status--error   { color: var(--mauve); }
+
+      /* ─── Right: info panel ─── */
+      .panel--right {
+        background-color: var(--mauve);
+        color: var(--mauve-text);
+        position: relative;
+      }
+
+      /* dot texture — same as index.astro */
+      .panel--right::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+        background-size: 22px 22px;
+      }
+
+      .right-content {
+        position: relative;
+        z-index: 1;
+        max-width: 320px;
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      .right-heading {
+        font-size: clamp(1.4rem, 2.5vw, 2rem);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.15;
+      }
+
+      .right-heading span {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.55);
+        margin-bottom: 0.5rem;
+      }
+
+      .contact-details {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .contact-details li {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .detail-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.5);
+      }
+
+      .detail-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .detail-value a {
+        color: #fff;
+        text-decoration: none;
+        border-bottom: 1.5px solid rgba(255,255,255,0.3);
+        transition: border-color 0.15s;
+      }
+
+      .detail-value a:hover {
+        border-color: #fff;
+      }
+
+      .availability-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255,255,255,0.12);
+        border-radius: 100px;
+        padding: 0.45rem 1rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 0.02em;
+        width: fit-content;
+      }
+
+      .availability-badge::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #6ee7a0;
+        flex-shrink: 0;
+      }
+
+      /* ─── Responsive ─── */
+      @media (max-width: 768px) {
+        html, body { overflow: auto; }
+
+        .split {
+          flex-direction: column;
+          height: auto;
+          min-height: 100vh;
+        }
+
+        .panel {
+          padding: 3rem 1.5rem;
+        }
+
+        .field-row {
+          grid-template-columns: 1fr;
+        }
+
+        .field--full {
+          grid-column: 1;
+        }
+
+        .form-footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .btn-submit {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
 
   <body>
-    <Header />
-    <!-- Subtle grid overlay matching portfolio background motif -->
-    <div class="grid-overlay" aria-hidden="true"></div>
+    <div class="split">
 
-    <main>
-      <header class="page-header">
-        <span class="label">— Get in touch</span>
-        <h1>Let's talk.</h1>
-        <p class="subtext">
-          Fill out the fields below and I'll respond within a few days.
-        </p>
-      </header>
+      <!-- Left: contact form -->
+      <div class="panel panel--left">
+        <div class="form-wrap">
+          <span class="page-label">
+            <a href="/"> &#8592; Home</a>
+          </span>
+          <h1>Let's talk.</h1>
+          <p class="subtext">Fill out the form and I'll get back to you within a few days.</p>
 
-      <form
-        id="contact-form"
-        method="POST"
-        action="/api/contact"
-        novalidate
-      >
-        <div class="field-group">
-          <div class="field">
-            <label for="name">
-              <span class="field-num">01</span> Full name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Your name"
-              autocomplete="name"
-              required
-            />
-            <span class="error" id="name-error"></span>
-          </div>
+          <form id="contact-form" method="POST" action="/api/contact" novalidate>
+            <div class="field-row">
+              <div class="field">
+                <label for="name">Full name</label>
+                <input type="text" id="name" name="name" placeholder="Your name" autocomplete="name" required />
+                <span class="error" id="name-error"></span>
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required />
+                <span class="error" id="email-error"></span>
+              </div>
+              <div class="field field--full">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" placeholder="What's this about?" required />
+                <span class="error" id="subject-error"></span>
+              </div>
+              <div class="field field--full">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+                <span class="error" id="message-error"></span>
+              </div>
+            </div>
 
-          <div class="field">
-            <label for="email">
-              <span class="field-num">02</span> Email address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-              required
-            />
-            <span class="error" id="email-error"></span>
-          </div>
+            <div class="form-footer">
+              <p class="privacy-note">Your info is never shared or sold.</p>
+              <button type="submit" class="btn-submit" id="submit-btn">
+                <span class="btn-text">Send message</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
 
-          <div class="field">
-            <label for="subject">
-              <span class="field-num">03</span> Subject
-            </label>
-            <input
-              type="text"
-              id="subject"
-              name="subject"
-              placeholder="What's this about?"
-              required
-            />
-            <span class="error" id="subject-error"></span>
-          </div>
-
-          <div class="field field--full">
-            <label for="message">
-              <span class="field-num">04</span> Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              rows="6"
-              placeholder="Write your message here..."
-              required
-            ></textarea>
-            <span class="error" id="message-error"></span>
-          </div>
+            <div id="form-status" role="alert" aria-live="polite"></div>
+          </form>
         </div>
+      </div>
 
-        <div class="form-footer">
-          <p class="privacy-note">Your information is never shared or sold.</p>
-          <button type="submit" id="submit-btn">
-            <span class="btn-text">Send message</span>
-            <span class="btn-arrow">→</span>
-          </button>
+      <!-- Right: contact info -->
+      <div class="panel panel--right">
+        <div class="right-content">
+          <div class="right-heading">
+            <span>FAHR Designs</span>
+            Get in touch — I'd love to hear from you.
+          </div>
+
+          <ul class="contact-details">
+            <li>
+              <span class="detail-label">Email</span>
+              <span class="detail-value">
+                <a href={`mailto:${email}`}>{email}</a>
+              </span>
+            </li>
+            <li>
+              <span class="detail-label">Location</span>
+              <span class="detail-value">{location}</span>
+            </li>
+            <li>
+              <span class="detail-label">Status</span>
+              <span class="detail-value">
+                <span class="availability-badge">{availability}</span>
+              </span>
+            </li>
+          </ul>
         </div>
+      </div>
 
-        <div id="form-status" role="alert" aria-live="polite"></div>
-      </form>
-    </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
 
     <script>
       const form = document.getElementById("contact-form") as HTMLFormElement;
@@ -108,8 +474,8 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
       const statusEl = document.getElementById("form-status") as HTMLElement;
 
       const fields = [
-        { id: "name", errorId: "name-error", message: "Name is required." },
-        { id: "email", errorId: "email-error", message: "A valid email is required." },
+        { id: "name",    errorId: "name-error",    message: "Name is required." },
+        { id: "email",   errorId: "email-error",   message: "A valid email is required." },
         { id: "subject", errorId: "subject-error", message: "Subject is required." },
         { id: "message", errorId: "message-error", message: "Message is required." },
       ];
@@ -167,7 +533,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
           //   SSR:       fetch(form.action, { method: "POST", body: new FormData(form) })
           //   Formspree: change form action to your Formspree URL
           //   Netlify:   add data-netlify="true" to <form>, remove this handler
-          await new Promise((r) => setTimeout(r, 1200)); // simulated delay
+          await new Promise((r) => setTimeout(r, 1200));
 
           form.reset();
           statusEl.textContent = "Message sent. I'll be in touch soon.";
@@ -183,270 +549,3 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
     </script>
   </body>
 </html>
-
-<style>
-  /* ─── Design Tokens (matches portfolio) ─── */
-  :root {
-    --ink:        #0e0d0b;
-    --paper:      #f2ede6;
-    --rust:       #c85b2a;
-    --rust-dim:   #8f3d19;
-    --mist:       #2a2825;
-    --muted:      #7a7570;
-    --border:     rgba(242, 237, 230, 0.15);
-    --field-bg:   #1a1916;
-    --grid-line:  rgba(242, 237, 230, 0.05);
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-mono:  'IBM Plex Mono', 'Courier New', monospace;
-    --max-w:      720px;
-  }
-
-  /* *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  } */
-
-  html, body {
-    background-color: var(--ink);
-    color: var(--paper);
-    font-size: 14px;
-    line-height: 1.7;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ─── Grid overlay (matches portfolio background motif) ─── */
-  .grid-overlay {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-      linear-gradient(var(--grid-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 60px 60px;
-  }
-
-  /* ─── Layout ─── */
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: var(--max-w);
-    margin: 0 auto;
-    padding: 5rem 2rem 6rem;
-  }
-
-  /* ─── Header ─── */
-  .page-header {
-    margin-bottom: 3.5rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1.5rem;
-  }
-
-  .label {
-    display: block;
-    font-size: 0.72rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    color: var(--rust);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
-
-  h1 {
-    font-size: clamp(2.8rem, 7vw, 4.5rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-    margin-bottom: 1rem;
-    color: var(--paper);
-  }
-
-  .subtext {
-    font-size: 0.82rem;
-    font-weight: 300;
-    color: var(--muted);
-    max-width: 42ch;
-    letter-spacing: 0.02em;
-  }
-
-  /* ─── Fields ─── */
-  .field-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem 2.5rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .field--full {
-    grid-column: 1 / -1;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  label {
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 0.6em;
-  }
-
-  .field-num {
-    color: var(--rust);
-    font-size: 0.65rem;
-  }
-
-  input,
-  textarea {
-    background: var(--field-bg);
-    border: 1px solid var(--border);
-    color: var(--paper);
-    font-size: 0.88rem;
-    font-weight: 300;
-    padding: 0.75rem 1rem;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    outline: none;
-    width: 100%;
-    border-radius: 0;
-    -webkit-appearance: none;
-  }
-
-  input::placeholder,
-  textarea::placeholder {
-    color: #3d3b37;
-  }
-
-  input:focus,
-  textarea:focus {
-    border-color: var(--rust);
-    box-shadow: 0 0 0 2px rgba(200, 91, 42, 0.12);
-  }
-
-  input.invalid,
-  textarea.invalid {
-    border-color: var(--rust);
-    background: rgba(200, 91, 42, 0.05);
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 140px;
-  }
-
-  /* Autofill override */
-  input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 100px var(--field-bg) inset;
-    -webkit-text-fill-color: var(--paper);
-  }
-
-  .error {
-    font-size: 0.68rem;
-    color: var(--rust);
-    min-height: 1em;
-    letter-spacing: 0.03em;
-  }
-
-  /* ─── Footer / Submit ─── */
-  .form-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1.75rem;
-  }
-
-  .privacy-note {
-    font-size: 0.68rem;
-    font-weight: 300;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-
-  button[type="submit"] {
-    background: transparent;
-    border: 1px solid var(--rust);
-    color: var(--rust);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    padding: 0.8rem 1.75rem;
-    text-transform: uppercase;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-    white-space: nowrap;
-  }
-
-  button[type="submit"]:hover:not(:disabled) {
-    background: var(--rust);
-    color: var(--paper);
-  }
-
-  button[type="submit"]:active:not(:disabled) {
-    background: var(--rust-dim);
-    border-color: var(--rust-dim);
-  }
-
-  button[type="submit"]:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .btn-arrow {
-    font-size: 1rem;
-    transition: transform 0.15s ease;
-  }
-
-  button[type="submit"]:hover:not(:disabled) .btn-arrow {
-    transform: translateX(3px);
-  }
-
-  /* ─── Status ─── */
-  #form-status {
-    margin-top: 1.25rem;
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    min-height: 1.2em;
-  }
-
-  .status--success { color: #6abf8a; }
-  .status--error   { color: var(--rust); }
-
-  /* ─── Responsive ─── */
-  @media (max-width: 560px) {
-    main {
-      padding: 3rem 1.25rem 4rem;
-    }
-
-    .field-group {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .field--full {
-      grid-column: 1;
-    }
-
-    .form-footer {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-</style>
